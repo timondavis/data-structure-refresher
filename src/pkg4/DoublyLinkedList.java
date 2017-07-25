@@ -1,5 +1,8 @@
 package pkg4;
 
+import java.util.AbstractSet;
+import java.util.Set;
+
 public class DoublyLinkedList<T extends Comparable<T>> {
 
 	/** @property DoublyLinkedNode<T> _head  The head of our list **/
@@ -94,16 +97,51 @@ public class DoublyLinkedList<T extends Comparable<T>> {
 	}
 	
 	/**
+	 * Find the data stored in the nth node from the head of the list
+	 * 
+	 * @param int position
+	 * 
+	 * @return T 
+	 */
+	public T findAtPosition( int position ) { 
+		
+		return findAtPosition( position, false );
+	}
+
+	/**
+	 * Find the data stored in the nth node from the head or tail of the list
+	 * 
+	 * @param int position
+	 * @param boolean reverse (FALSE to search from head, TRUE to search from tail)
+	 * @return
+	 */
+	public T findAtPosition( int position , boolean reverse ) { 
+		
+		DoublyLinkedNode<T> n;
+
+		if ( reverse ) { n = _tail; }
+		else { n = _head; }
+			
+		for ( int i = 0 ; n != null ; i++ ) { 
+			
+			if ( i == position ) { return n.getData(); }
+			n = progress( n, reverse );
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Shift the given node one space to its left, if possible. 
 	 * 
 	 * @param DoublyLinkedNode<T> n
 	 */
 	public void shiftLeft( DoublyLinkedNode<T> n ) { 
 
-		// If left is null, this is the leftmost on the list and theres no shift to execute
+		// If left is null, this is the leftmost on the list and there's no shift to execute
 		if ( n.getPrevious() == null ) { return; }
 		
-		// If the position we're moving into exists, repoint its pointer at n
+		// If the position we're moving into exists, re-point its pointer at n
 		if ( n.getPrevious().getPrevious() != null ) { 
 			
 			n.getPrevious().getPrevious().setNext( n );
@@ -129,7 +167,7 @@ public class DoublyLinkedList<T extends Comparable<T>> {
 		// Update the prior node to regard n as the previous.
 		n.getNext().setPrevious( n );
 		
-		// If we shifted to the left of head, reappoint the head pointer
+		// If we shifted to the left of head, re-appoint the head pointer
 		if ( _head.compareTo( n.getNext() ) == 0 ) {
 			
 			_head = n;
@@ -150,7 +188,7 @@ public class DoublyLinkedList<T extends Comparable<T>> {
 		boolean shiftOperationExecuted = false;
 		
 		// If there are not at least two valid nodes, do not sort.
-		if ( indexNode == null && indexNode.getNext() == null ) { return; }
+		if ( indexNode == null || indexNode.getNext() == null ) { return; }
 		
 		// Look for nodes greater than the value of the index node
 		do { 
@@ -248,6 +286,70 @@ public class DoublyLinkedList<T extends Comparable<T>> {
 	}
 	
 	/**
+	 * Removes any duplicated values from the list, except for the first instance
+	 */
+	public void deduplicate() {
+		
+		deduplicate( true );
+	}
+	
+	/**
+	 * Removes any duplicated values from the list; you can specify whether or not to remove the first instance
+	 * 
+	 * @param boolean leaveFirstInstance
+	 */
+	public void deduplicate( boolean leaveFirstInstance ) {
+		
+		DoublyLinkedNode<T> leftIndex = _head;
+		DoublyLinkedNode<T> pointer;
+		
+		boolean duplicateInstanceFound = false; 
+		boolean removeAllInstances = !leaveFirstInstance;
+
+		// Loop through all nodes in list
+		while( leftIndex != null ) { 
+
+			// If on the last loop we found duplicates, 
+			if ( removeAllInstances && duplicateInstanceFound ) {
+
+				delete( leftIndex.getPrevious() );
+			}
+		
+			duplicateInstanceFound = false;
+			
+			// Create a pointer.  We're going to move pointer this through the remainder of the list and look for duplicates.
+			pointer = leftIndex.getNext();
+			
+			// Look for duplicate values.  If found, delete the duplicate node, progress the loop, 
+			// and flag - we found a duplicate.
+			while ( pointer != null ) { 
+				
+				if ( pointer.compareTo( leftIndex ) == 0 ) {
+					
+					if ( pointer.getNext() == null ) { 
+						
+						delete( pointer );
+						pointer = pointer.getNext();
+					} else {
+						
+						pointer = pointer.getNext();
+						delete( pointer.getPrevious() );
+					}
+
+					duplicateInstanceFound = true;
+
+				} else { 
+					
+					pointer = pointer.getNext();
+				}
+			}
+			
+			// Move the pointer up one
+			leftIndex = leftIndex.getNext();
+		}
+	}
+	
+	/**
 	 * Convert the node into a string
 	 * 
 	 * @return String;
@@ -294,6 +396,33 @@ public class DoublyLinkedList<T extends Comparable<T>> {
 		return s;
 	}	
 	
+
+	
+	/**
+	 * Get the next node from the given current node
+	 * 
+	 * @param DoublyLinkedNode<T> currentNode 
+	 * @return DoublyLinkedNode<T>
+	 */
+	protected DoublyLinkedNode<T> progress( DoublyLinkedNode<T> currentNode ) { 
+		
+		return progress( currentNode, false );
+	}
+
+	/**
+	 * Get the next OR previous node from the given current node
+	 * 
+	 * @param DoublyLinkedNode<T> currentNode
+	 * @param boolean reverse (TRUE gets previous, FALSE gets next)
+	 * 
+	 * @return DoublyLinkedNode<T>
+	 */
+	protected DoublyLinkedNode<T> progress( DoublyLinkedNode<T> currentNode, boolean reverse ) { 
+		
+		if ( reverse ) { return currentNode.getPrevious(); }
+		else { return currentNode.getNext(); }
+	}
+	
 	/**
 	 * Insert the indicated node to the right (next) of the indicated node.
 	 * @param DoublyLinkedNode<T> indexedNode
@@ -308,5 +437,19 @@ public class DoublyLinkedList<T extends Comparable<T>> {
 		newNode.setPrevious( indexedNode );
 	}
 	
-
+	/**
+	 * Remove the given node from the linked list.  Automatically repairs broken links.
+	 * 
+	 * @param DoublyLinkedNode<T> nodeToDelete
+	 */
+	private void delete( DoublyLinkedNode<T> nodeToDelete ) { 
+		
+		if ( nodeToDelete == null ) { return; }
+		
+		if ( nodeToDelete == _head ) { deleteAtHead(); return; }
+		if ( nodeToDelete == _tail ) { deleteAtTail(); return; }
+		
+		nodeToDelete.getPrevious().setNext( nodeToDelete.getNext() );
+		nodeToDelete.getNext().setPrevious( nodeToDelete.getPrevious() );
+	}
 }

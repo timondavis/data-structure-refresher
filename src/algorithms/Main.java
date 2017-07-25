@@ -8,20 +8,37 @@ public class Main {
 		// TODO Auto-generated method stub
 		
 		DoublyLinkedList<Integer> ll = new DoublyLinkedList<Integer>();
+		LinkedList<Integer> sl = new LinkedList<Integer>();
+		
+		sl.insertAtHead( 5 );
+		sl.insertAtHead( 27 );
+		sl.insertAtHead( 15 );
+		
+		sl.delete( 5 );
+		sl.delete( 27 );
 		
 		ll.insertAtHead( 48 );
+		ll.insertAtHead( 300 );
 		ll.insertAtHead( 5 );
 		ll.insertAtHead( 98 );
 		ll.insertAtHead( 993 );
+		ll.insertAtHead( 300 );
 		ll.insertAtHead( 35 );
 		ll.insertAtTail( 115 );
 		ll.insertAtHead( 12 );
 		ll.insertAtHead( 598 );
 		ll.insertAtTail( 300 );
 
-		ll.reverseSort();
+		//ll.reverseSort();
+		
+		//ll.deduplicate( true );
 		
 		System.out.println( "Forward: " + ll.toString( false ) );
+		
+		System.out.println( "Fourth from left: " + ll.findAtPosition( 3 ) );
+		System.out.println( "Fifth from the right: " + ll.findAtPosition( 4, true ) );
+		
+		System.out.println( "Single List: " + sl.toString() );
 
 		
 		/**

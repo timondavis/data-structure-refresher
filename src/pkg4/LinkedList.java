@@ -23,6 +23,24 @@ public class LinkedList<T extends Comparable<T>> {
 		return popped.getData();
 	}
 	
+	public void delete( T data ) { 
+		
+		Node<T> pointer = _head;
+		
+		if ( pointer.getData().compareTo( data ) == 0 ) { _head = pointer.getNext(); }
+		
+		while ( pointer.getNext() != null ) { 
+			
+			if ( pointer.getNext().getData().compareTo( data ) == 0 ) { 
+				
+				pointer.setNext( pointer.getNext().getNext() );
+				return;
+			}
+			
+			pointer = pointer.getNext();
+		}
+	}
+	
 	public String toString() { 
 		
 		String s = "{";
